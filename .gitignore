@@ -1,0 +1,11 @@
+.idea/
+**/.terraform/
+# .terraform.lock.hcl is intentionally NOT ignored — commit it like a lockfile
+*.tfstate
+*.tfstate.backup
+*.tfplan
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
