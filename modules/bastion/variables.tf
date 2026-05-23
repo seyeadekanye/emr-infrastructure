@@ -11,15 +11,9 @@ variable "public_subnet_id" {
   description = "Single public subnet to place the bastion in"
 }
 
-variable "allowed_ssh_cidrs" {
-  type        = list(string)
-  description = "CIDR blocks allowed to SSH (e.g. [\"1.2.3.4/32\"] for your IP)"
-}
-
-variable "key_name" {
+variable "rds_sg_id" {
   type        = string
-  default     = ""
-  description = "EC2 key pair name for SSH access (leave empty to use Session Manager only)"
+  description = "RDS security group ID — bastion will be granted ingress on 3306"
 }
 
 variable "instance_type" {

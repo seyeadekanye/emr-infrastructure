@@ -13,14 +13,14 @@ ecs_memory         = 2048
 log_retention_days = 14
 
 cloudfront_price_class = "PriceClass_100"
-api_domain_name        = "api-dev.docli.io"
-frontend_domain        = "dev.docli.io"
+api_domain_name        = "api-dev.mallow.io"
+frontend_domain        = "dev.mallow.io"
 
 use_existing_cert   = true
-existing_cert_arn   = "arn:aws:acm:us-east-2:736822756246:certificate/8d2a6abe-6b38-4d69-af95-77ceb570dba1"
-cloudfront_cert_arn = "arn:aws:acm:us-east-1:736822756246:certificate/5639afd8-c7d0-4761-b1d5-795c0096e31e"
+existing_cert_arn   = "arn:aws:acm:us-east-2:736822756246:certificate/a4e841b2-38b4-48a9-a1ef-748fcf6e636e"
+cloudfront_cert_arn = "arn:aws:acm:us-east-1:736822756246:certificate/2373e2ef-b365-48bb-99cd-5b0e2a42a0fa"
 
-ses_domain = "dev.docli.io"
+ses_domain = "mallowhealth.com"
 
 db_allowed_cidrs = ["0.0.0.0/0"]
 

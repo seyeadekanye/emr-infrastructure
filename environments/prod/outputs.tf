@@ -2,7 +2,7 @@
 
 output "route53_name_servers" {
   value       = module.route53.name_servers
-  description = "Delegate these NS records at your registrar for docli.io"
+  description = "Delegate these NS records at your registrar for mallow.io"
 }
 
 output "api_fqdn" {
@@ -42,6 +42,11 @@ output "documents_bucket_name" {
   value = module.storage.bucket_name
 }
 
+output "bastion_instance_id" {
+  value       = module.bastion.instance_id
+  description = "Use: aws ssm start-session --target <this_value>"
+}
+
 output "documents_bucket_secondary" {
   value       = module.storage_secondary.bucket_name
   description = "S3 replication target in us-west-2"
@@ -64,4 +69,36 @@ output "ses_notifications_topic_arn" {
 
 output "ses_configuration_set_name" {
   value = module.ses.configuration_set_name
+}
+
+output "ses_verification_token" {
+  value       = module.ses.verification_token
+  description = "Add TXT record in GoDaddy: _amazonses.mallowhealth.com → this value"
+}
+
+output "ses_dkim_records" {
+  value       = module.ses.dkim_records
+  description = "Add these 3 CNAME records in GoDaddy"
+}
+
+output "ses_mail_from_mx" {
+  value       = module.ses.mail_from_mx_record
+  description = "Add MX record in GoDaddy: mail.mallowhealth.com → this value (priority 10)"
+}
+
+# ── Monitoring ────────────────────────────────────────────────────────────────
+
+output "monitoring_critical_topic_arn" {
+  value       = module.monitoring.critical_topic_arn
+  description = "Subscribe additional endpoints (Slack, PagerDuty) for critical alerts"
+}
+
+output "monitoring_warning_topic_arn" {
+  value       = module.monitoring.warning_topic_arn
+  description = "Subscribe additional endpoints for warning alerts"
+}
+
+output "monitoring_dashboard_name" {
+  value       = module.monitoring.dashboard_name
+  description = "CloudWatch dashboard: emr-prod-overview"
 }

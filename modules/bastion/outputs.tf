@@ -1,9 +1,6 @@
-output "public_ip" {
-  value = aws_instance.bastion.public_ip
-}
-
 output "instance_id" {
-  value = aws_instance.bastion.id
+  value       = aws_instance.bastion.id
+  description = "Use with: aws ssm start-session --target <instance_id>"
 }
 
 output "security_group_id" {

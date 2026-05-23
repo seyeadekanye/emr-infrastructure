@@ -5,7 +5,7 @@ variable "env" {
 variable "cors_origins" {
   type        = list(string)
   default     = []
-  description = "Allowed origins for S3 CORS (e.g. [\"https://docli.io\"])"
+  description = "Allowed origins for S3 CORS (e.g. [\"https://mallow.io\"])"
 }
 
 variable "enable_replication" {

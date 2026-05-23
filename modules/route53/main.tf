@@ -6,7 +6,7 @@ resource "aws_route53_zone" "main" {
 }
 
 # ── API Record ───────────────────────────────────────────────────────────────
-# Simple CNAME pointing api.docli.io directly at the primary API GW.
+# Simple CNAME pointing api.mallow.io directly at the primary API GW.
 # When multi-region failover is re-enabled, replace with failover routing.
 
 resource "aws_route53_record" "api" {

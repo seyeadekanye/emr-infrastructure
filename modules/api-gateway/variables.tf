@@ -21,7 +21,7 @@ variable "api_domain_name" {
 variable "failover_domain_name" {
   type        = string
   default     = ""
-  description = "Optional user-facing domain (e.g. api.docli.io) that CNAMEs via Route53 failover to the regional API domain"
+  description = "Optional user-facing domain (e.g. api.mallow.io) that CNAMEs via Route53 failover to the regional API domain"
 }
 
 variable "failover_certificate_arn" {
@@ -33,5 +33,5 @@ variable "failover_certificate_arn" {
 variable "cors_allow_origin" {
   type        = string
   default     = "*"
-  description = "Origin for CORS Access-Control-Allow-Origin header (e.g. https://docli.io)"
+  description = "Origin for CORS Access-Control-Allow-Origin header (e.g. https://mallow.io)"
 }

@@ -14,3 +14,7 @@ output "db_arn" {
   value       = aws_db_instance.main.arn
   description = "Used as source_db_arn for cross-region read replica"
 }
+
+output "db_identifier" {
+  value = aws_db_instance.main.identifier
+}

@@ -70,7 +70,7 @@ module "api_gateway" {
   private_subnet_ids       = module.networking.private_subnet_ids
   certificate_arn          = module.acm_api.certificate_arn
   api_domain_name          = var.primary_api_domain_name
-  cors_allow_origin        = "https://docli.io"
+  cors_allow_origin        = "https://mallow.io"
   failover_domain_name     = "api.${var.root_domain}"
   failover_certificate_arn = module.acm_api.certificate_arn
 }
@@ -78,9 +78,8 @@ module "api_gateway" {
 module "ses" {
   source                 = "../../modules/ses"
   env                    = var.env
-  domain                 = var.root_domain
-  create_route53_records = true
-  route53_zone_id        = module.route53.zone_id
+  domain                 = var.ses_domain
+  create_route53_records = false
 }
 
 # ── Tenant Document Storage ───────────────────────────────────────────────────
@@ -90,7 +89,7 @@ module "ses" {
 module "storage" {
   source                 = "../../modules/storage"
   env                    = var.env
-  cors_origins           = ["https://docli.io"]
+  cors_origins           = ["https://mallow.io"]
   enable_replication     = true
   replication_bucket_arn = module.storage_secondary.bucket_arn
 }
@@ -131,6 +130,41 @@ module "frontend" {
   domain_name            = var.frontend_domain
   cloudfront_price_class = var.cloudfront_price_class
   certificate_arn        = module.acm_cloudfront.certificate_arn
+}
+
+# ── Bastion Host (SSM Session Manager) ───────────────────────────────────────
+
+module "bastion" {
+  source           = "../../modules/bastion"
+  env              = var.env
+  vpc_id           = module.networking.vpc_id
+  public_subnet_id = module.networking.public_subnet_ids[0]
+  rds_sg_id        = module.networking.rds_sg_id
+}
+
+# ── Monitoring & Alerts ────────────────────────────────────────────────────────
+
+module "monitoring" {
+  source = "../../modules/monitoring"
+  env    = var.env
+
+  alert_email = var.alert_email
+
+  ecs_cluster_name   = module.ecs.cluster_name
+  ecs_service_name   = module.ecs.service_name
+  ecs_desired_count  = var.ecs_desired_count
+  ecs_log_group_name = "/ecs/emr-${var.env}"
+
+  rds_instance_id          = module.rds.db_identifier
+  rds_allocated_storage_gb = var.rds_allocated_storage
+
+  api_gateway_name  = module.api_gateway.rest_api_name
+  api_gateway_stage = module.api_gateway.stage_name
+
+  cloudfront_distribution_id = module.frontend.distribution_id
+
+  nlb_arn_suffix          = module.api_gateway.nlb_arn_suffix
+  target_group_arn_suffix = module.api_gateway.target_group_arn_suffix
 }
 
 # ─────────────────────────────────────────────────────────────────────────────

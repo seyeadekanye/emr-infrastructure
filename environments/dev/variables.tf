@@ -74,7 +74,7 @@ variable "cloudfront_cert_arn" {
 
 variable "ses_domain" {
   type        = string
-  description = "Domain to register with SES for sending email (e.g. dev.docli.io)"
+  description = "Domain to register with SES for sending email (e.g. dev.mallow.io)"
 }
 
 # ── Direct DB access (dev only) ────────────────────────────────────────────────

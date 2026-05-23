@@ -4,7 +4,7 @@ output "zone_id" {
 
 output "name_servers" {
   value       = aws_route53_zone.main.name_servers
-  description = "Delegate these NS records at your registrar for docli.io"
+  description = "Delegate these NS records at your registrar for mallow.io"
 }
 
 output "api_fqdn" {

@@ -77,7 +77,7 @@ module "api_gateway" {
   private_subnet_ids = module.networking.private_subnet_ids
   certificate_arn    = module.acm_api.certificate_arn
   api_domain_name    = var.api_domain_name
-  cors_allow_origin  = "https://dev.docli.io"
+  cors_allow_origin  = "https://dev.mallow.io"
 }
 
 # ── Tenant Document Storage ───────────────────────────────────────────────────
@@ -85,7 +85,7 @@ module "api_gateway" {
 module "storage" {
   source       = "../../modules/storage"
   env          = var.env
-  cors_origins = ["https://dev.docli.io"]
+  cors_origins = ["https://dev.mallow.io"]
 }
 
 # ── Agreement Document Storage ───────────────────────────────────────────────
@@ -129,6 +129,16 @@ module "ecs" {
   agreement_s3_bucket_arn  = module.agreements.bucket_arn
   agreement_s3_bucket_name = module.agreements.bucket_name
   kms_key_arns             = [module.secrets.kms_key_arn]
+}
+
+# ── Bastion Host (SSM Session Manager) ───────────────────────────────────────
+
+module "bastion" {
+  source           = "../../modules/bastion"
+  env              = var.env
+  vpc_id           = module.networking.vpc_id
+  public_subnet_id = module.networking.public_subnet_ids[0]
+  rds_sg_id        = module.networking.rds_sg_id
 }
 
 # ── Direct RDS access (dev only) ─────────────────────────────────────────────

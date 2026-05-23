@@ -18,3 +18,19 @@ output "nlb_dns" {
 output "target_group_arn" {
   value = aws_lb_target_group.api.arn
 }
+
+output "rest_api_name" {
+  value = aws_api_gateway_rest_api.main.name
+}
+
+output "stage_name" {
+  value = aws_api_gateway_stage.main.stage_name
+}
+
+output "nlb_arn_suffix" {
+  value = aws_lb.main.arn_suffix
+}
+
+output "target_group_arn_suffix" {
+  value = aws_lb_target_group.api.arn_suffix
+}

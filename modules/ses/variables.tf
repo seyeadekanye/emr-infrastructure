@@ -4,7 +4,7 @@ variable "env" {
 
 variable "domain" {
   type        = string
-  description = "Domain to verify with SES (e.g. docli.io)"
+  description = "Domain to verify with SES (e.g. mallow.io)"
 }
 
 variable "create_route53_records" {

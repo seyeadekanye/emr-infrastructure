@@ -1,6 +1,6 @@
 variable "root_domain" {
   type        = string
-  description = "Apex domain — becomes the Route53 hosted zone (e.g. docli.io)"
+  description = "Apex domain — becomes the Route53 hosted zone (e.g. mallow.io)"
 }
 
 variable "api_target" {
