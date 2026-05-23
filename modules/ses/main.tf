@@ -88,7 +88,7 @@ resource "aws_route53_record" "mail_from_spf" {
 # Waits for domain verification to complete after DNS records are created.
 # Only runs in prod where records are auto-created above.
 # Temporarily commented out — SES verification still propagating.
-# Uncomment and re-apply once `aws ses get-identity-verification-attributes --identities "docli.io" --region us-east-1` shows "Success".
+# Uncomment and re-apply once `aws ses get-identity-verification-attributes --identities "mallow.io" --region us-east-1` shows "Success".
 # resource "aws_ses_domain_identity_verification" "main" {
 #   count      = var.create_route53_records ? 1 : 0
 #   domain     = aws_ses_domain_identity.main.domain

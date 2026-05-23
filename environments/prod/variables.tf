@@ -5,7 +5,7 @@ variable "env" {
 
 variable "root_domain" {
   type        = string
-  description = "Apex domain for Route53 hosted zone (e.g. docli.io)"
+  description = "Apex domain for Route53 hosted zone (e.g. mallow.io)"
 }
 
 # ── Regions ───────────────────────────────────────────────────────────────────
@@ -87,12 +87,12 @@ variable "frontend_domain" {
 
 variable "primary_api_domain_name" {
   type        = string
-  description = "Regional API GW custom domain in us-east-2 (e.g. api-us-east-2.docli.io)"
+  description = "Regional API GW custom domain in us-east-2 (e.g. api-us-east-2.mallow.io)"
 }
 
 variable "secondary_api_domain_name" {
   type        = string
-  description = "Regional API GW custom domain in secondary region (e.g. api-us-west-2.docli.io)"
+  description = "Regional API GW custom domain in secondary region (e.g. api-us-west-2.mallow.io)"
 }
 
 variable "use_existing_cert" {
@@ -114,6 +114,20 @@ variable "cloudfront_cert_arn" {
   type        = string
   default     = ""
   description = "ACM cert ARN in us-east-1 for CloudFront"
+}
+
+# ── SES ───────────────────────────────────────────────────────────────────────
+
+variable "ses_domain" {
+  type        = string
+  description = "Domain to register with SES for sending email (e.g. mallowhealth.com)"
+}
+
+# ── Monitoring ────────────────────────────────────────────────────────────────
+
+variable "alert_email" {
+  type        = string
+  description = "Email address for CloudWatch alarm notifications"
 }
 
 # ── Secrets — passed via -var in CI, never committed ─────────────────────────

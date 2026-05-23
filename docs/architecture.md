@@ -42,7 +42,7 @@ Provisions:
 
 ```
 Inputs:
-  domain_name        string   # e.g. api.docli.io
+  domain_name        string   # e.g. api.mallow.io
   use_existing_cert  bool
   existing_cert_arn  string   # used when use_existing_cert = true
 
@@ -208,7 +208,7 @@ Inputs:
   private_subnet_ids   list(string)
   target_group_port    number        # 8080
   certificate_arn      string
-  api_domain_name      string        # e.g. api.docli.io
+  api_domain_name      string        # e.g. api.mallow.io
   vpc_id               string
 
 Outputs:
@@ -249,7 +249,7 @@ Provisions:
 ```
 Inputs:
   env                    string
-  domain_name            string        # e.g. docli.io
+  domain_name            string        # e.g. mallow.io
   cloudfront_price_class string
   certificate_arn        string        # must be in us-east-1
 

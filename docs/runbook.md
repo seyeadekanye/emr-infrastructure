@@ -27,8 +27,8 @@ terraform apply
 ```
 
 **Post-apply checklist:**
-1. Add CNAME at registrar: `api-dev.docli.io` → value from `custom_domain_target` output
-2. Add CNAME at registrar: `dev.docli.io` → value from `cloudfront_domain` output
+1. Add CNAME at registrar: `api-dev.mallow.io` → value from `custom_domain_target` output
+2. Add CNAME at registrar: `dev.mallow.io` → value from `cloudfront_domain` output
 3. Update `VITE_JAVA_API_URL` in frontend `.env` to new API custom domain
 4. Run Flyway migrations against new RDS instance
 5. Seed `emr_control` DB — handled automatically by `MultiTenantFlywayRunner` on app startup

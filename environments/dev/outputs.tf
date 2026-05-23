@@ -36,6 +36,11 @@ output "documents_bucket_name" {
   value = module.storage.bucket_name
 }
 
+output "bastion_instance_id" {
+  value       = module.bastion.instance_id
+  description = "Use: aws ssm start-session --target <this_value>"
+}
+
 # ── SES — add these records manually at your registrar ────────────────────────
 
 output "ses_verification_token" {

@@ -68,8 +68,8 @@ All resources: `emr-{env}-{resource}`. ECR is shared (`emr-api`). Secrets: `emr/
 
 | # | Decision |
 |---|---|
-| 1 | **Prod**: Route53 hosted zone for `docli.io` — registrar delegates to Route53 NS records. **Dev**: DNS still external (registrar), Terraform outputs CNAME values |
-| 2 | **Prod**: API GW custom domains are region-scoped (`api-us-east-2.docli.io`, `api-us-west-2.docli.io`). Route53 failover provides user-facing `api.docli.io`. **Dev**: single API GW custom domain (`api-dev.docli.io`) pointed at manually |
+| 1 | **Prod**: Route53 hosted zone for `mallow.io` — registrar delegates to Route53 NS records. **Dev**: DNS still external (registrar), Terraform outputs CNAME values |
+| 2 | **Prod**: API GW custom domains are region-scoped (`api-us-east-2.mallow.io`, `api-us-west-2.mallow.io`). Route53 failover provides user-facing `api.mallow.io`. **Dev**: single API GW custom domain (`api-dev.mallow.io`) pointed at manually |
 | 3 | ACM: existing cert via data source by default; new-cert provisioning is a commented stub |
 | 4 | Control plane DB (`emr_control`) is managed in-app by `TenantProvisioningService` — not Terraform scope |
 | 5 | Jitsi is out of scope |
@@ -83,15 +83,15 @@ All resources: `emr-{env}-{resource}`. ECR is shared (`emr-api`). Secrets: `emr/
 **Traffic path (prod):**
 ```
 Frontend: Registrar → Route53 (ALIAS) → CloudFront → S3
-API:      Registrar → Route53 NS delegation → Route53 failover (api.docli.io)
-              PRIMARY  → api-us-east-2.docli.io → API GW → NLB → ECS → RDS (primary)
-              SECONDARY → api-us-west-2.docli.io → API GW → NLB → ECS → RDS (replica)
+API:      Registrar → Route53 NS delegation → Route53 failover (api.mallow.io)
+              PRIMARY  → api-us-east-2.mallow.io → API GW → NLB → ECS → RDS (primary)
+              SECONDARY → api-us-west-2.mallow.io → API GW → NLB → ECS → RDS (replica)
 ```
 
 **ACM certs needed (3 total in prod):**
-- `api-us-east-1.docli.io` in `us-east-1` — primary API GW (same region as default provider)
-- `api-us-west-2.docli.io` in `us-west-2` — secondary API GW
-- `docli.io` (wildcard `*.docli.io` recommended) in `us-east-1` — CloudFront (can reuse the same cert as primary API GW if using wildcard)
+- `api-us-east-1.mallow.io` in `us-east-1` — primary API GW (same region as default provider)
+- `api-us-west-2.mallow.io` in `us-west-2` — secondary API GW
+- `mallow.io` (wildcard `*.mallow.io` recommended) in `us-east-1` — CloudFront (can reuse the same cert as primary API GW if using wildcard)
 
 **Secondary region IAM naming:** All secondary modules receive `env = "prod-us-west-2"` (via `local.secondary_env`) to avoid IAM global name collisions with primary resources (`emr-prod-*` vs `emr-prod-us-west-2-*`).
 
@@ -102,7 +102,7 @@ API:      Registrar → Route53 NS delegation → Route53 failover (api.docli.io
 **RDS failover (manual steps):**
 1. `aws rds promote-read-replica --db-instance-identifier emr-prod-us-west-2-db-replica`
 2. Redeploy secondary ECS service with updated `DB_HOST` env var
-3. Route53 health checks automatically shift `api.docli.io` to secondary once ECS is healthy
+3. Route53 health checks automatically shift `api.mallow.io` to secondary once ECS is healthy
 
 **Tenant document storage:** `emr-{env}-documents` bucket per region. Private, versioned, AES-256 encrypted. Non-current versions tier to Standard-IA at 30 days, Glacier at 90 days. In prod, the primary bucket replicates to the secondary region bucket (`emr-prod-us-west-2-documents`) via S3 cross-region replication. Each ECS task role gets scoped `s3:GetObject`/`s3:PutObject`/`s3:DeleteObject`/`s3:ListBucket` access to its region's bucket.
 
@@ -131,10 +131,10 @@ API:      Registrar → Route53 NS delegation → Route53 failover (api.docli.io
 | `ecs_cpu` / `ecs_memory` | `1024` / `2048` | `2048` / `4096` | `2048` / `4096` |
 | `log_retention_days` | `14` | `90` | `90` |
 | `cloudfront_price_class` | `PriceClass_100` | `PriceClass_All` | N/A (CloudFront is global) |
-| API domain | `api-dev.docli.io` | `api-us-east-1.docli.io` | `api-us-west-2.docli.io` |
-| User-facing API | direct CNAME at registrar | `api.docli.io` via Route53 | failover target |
-| `frontend_domain` | `dev.docli.io` | `docli.io` | — |
-| DNS | External registrar | Route53 (`docli.io` hosted zone) | — |
+| API domain | `api-dev.mallow.io` | `api-us-east-1.mallow.io` | `api-us-west-2.mallow.io` |
+| User-facing API | direct CNAME at registrar | `api.mallow.io` via Route53 | failover target |
+| `frontend_domain` | `dev.mallow.io` | `mallow.io` | — |
+| DNS | External registrar | Route53 (`mallow.io` hosted zone) | — |
 
 ## AWS Account Reference
 

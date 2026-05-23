@@ -298,9 +298,9 @@ resource "aws_api_gateway_base_path_mapping" "main" {
 }
 
 # ── Failover Domain (optional) ──────────────────────────────────────────────
-# User-facing domain (e.g. api.docli.io) that Route53 failover CNAMEs to
+# User-facing domain (e.g. api.mallow.io) that Route53 failover CNAMEs to
 # the regional API domain. API Gateway needs this registered as a custom
-# domain so it accepts requests with Host: api.docli.io.
+# domain so it accepts requests with Host: api.mallow.io.
 
 resource "aws_api_gateway_domain_name" "failover" {
   count                    = var.failover_domain_name != "" ? 1 : 0
