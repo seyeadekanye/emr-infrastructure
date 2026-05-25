@@ -25,3 +25,12 @@ ses_domain = "mallowhealth.com"
 db_allowed_cidrs = ["0.0.0.0/0"]
 
 # db_password and jwt_secret are passed via -var in CI (never committed)
+
+# ── Messaging staff inboxes ────────────────────────────────────────────────────
+# These are the destinations for ClaimDenied / IncidentFiled / PaymentReceived /
+# AuthExpiry / Stripe-PAYMENT_FAILED listener sends. Replace the placeholders
+# with real addresses before flipping email.enabled=true in prod. Leaving any
+# blank is safe — the listener logs+skips. See docs/messaging/FEATURES.md.
+messaging_billing_notify_email    = "billing@mallowhealth.com"
+messaging_compliance_notify_email = "compliance@mallowhealth.com"
+messaging_mallowhq_billing_email  = "ops@mallowhealth.com"

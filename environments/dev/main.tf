@@ -100,10 +100,11 @@ module "agreements" {
 # for manual addition at the registrar.
 
 module "ses" {
-  source                 = "../../modules/ses"
-  env                    = var.env
-  domain                 = var.ses_domain
-  create_route53_records = false
+  source                   = "../../modules/ses"
+  env                      = var.env
+  domain                   = var.ses_domain
+  create_route53_records   = false
+  webhook_subscription_url = "https://${var.api_domain_name}/api/v1/messaging/webhooks/ses"
 }
 
 # ── ECS ───────────────────────────────────────────────────────────────────────
@@ -129,6 +130,16 @@ module "ecs" {
   agreement_s3_bucket_arn  = module.agreements.bucket_arn
   agreement_s3_bucket_name = module.agreements.bucket_name
   kms_key_arns             = [module.secrets.kms_key_arn]
+
+  # ── Messaging platform (Slice 1a — 6c) ───────────────────────────────────
+  # Real email sends are on in dev. SMS stays off (no End User Messaging
+  # SMS provider in code yet; 10DLC paperwork not started — DESIGN.md §G).
+  messaging_email_enabled           = true
+  messaging_email_from              = "noreply@${var.ses_domain}"
+  messaging_ses_config_set          = module.ses.configuration_set_name
+  messaging_billing_notify_email    = var.messaging_billing_notify_email
+  messaging_compliance_notify_email = var.messaging_compliance_notify_email
+  messaging_mallowhq_billing_email  = var.messaging_mallowhq_billing_email
 }
 
 # ── Bastion Host (SSM Session Manager) ───────────────────────────────────────

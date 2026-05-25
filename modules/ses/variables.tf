@@ -18,3 +18,9 @@ variable "route53_zone_id" {
   default     = ""
   description = "Required when create_route53_records = true"
 }
+
+variable "webhook_subscription_url" {
+  type        = string
+  default     = ""
+  description = "HTTPS URL to subscribe to the SES notifications SNS topic for bounce/complaint events. Typically https://<api_domain>/api/v1/messaging/webhooks/ses. Empty disables the subscription."
+}

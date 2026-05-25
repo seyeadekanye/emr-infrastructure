@@ -91,6 +91,26 @@ resource "aws_iam_role_policy" "task_ses" {
   })
 }
 
+# ── SNS Publish (Slice 1c — SMS via SNS) ──────────────────────────────────────
+# Gated by var.messaging_grant_sns_publish so the policy isn't attached until
+# the operator has decided to enable SMS-via-SNS in this environment. SNS
+# direct-publish to phone numbers requires Resource=* — the API doesn't model
+# per-number ARNs.
+resource "aws_iam_role_policy" "task_sns_publish" {
+  count = var.messaging_grant_sns_publish ? 1 : 0
+  name  = "emr-${var.env}-task-sns-publish"
+  role  = aws_iam_role.task.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = ["sns:Publish"]
+      Resource = "*"
+    }]
+  })
+}
+
 resource "aws_iam_role_policy" "task_bedrock" {
   count = var.enable_bedrock ? 1 : 0
   name  = "emr-${var.env}-task-bedrock"
@@ -188,7 +208,22 @@ resource "aws_ecs_task_definition" "api" {
       { name = "DOCUMENT_S3_BUCKET", value = var.document_s3_bucket }
       ] : [], var.agreement_s3_bucket_name != "" ? [
       { name = "AGREEMENT_S3_BUCKET", value = var.agreement_s3_bucket_name }
-    ] : [])
+      ] : [],
+      # ── Messaging platform (Slice 1a — 6c) ───────────────────────────────
+      # Every var is optional with safe defaults — the messaging stack stays
+      # in log-only mode until messaging_email_enabled / messaging_sms_enabled
+      # are flipped. Defaults map to the application-{env}.yml @Value defaults.
+      [
+        { name = "EMAIL_ENABLED", value = tostring(var.messaging_email_enabled) },
+        { name = "SMS_ENABLED", value = tostring(var.messaging_sms_enabled) },
+        { name = "SMS_PROVIDER", value = var.messaging_sms_provider },
+      ],
+      var.messaging_email_from != "" ? [{ name = "EMAIL_FROM", value = var.messaging_email_from }] : [],
+      var.messaging_ses_config_set != "" ? [{ name = "MESSAGING_SES_CONFIG_SET", value = var.messaging_ses_config_set }] : [],
+      var.messaging_billing_notify_email != "" ? [{ name = "MESSAGING_BILLING_NOTIFY_EMAIL", value = var.messaging_billing_notify_email }] : [],
+      var.messaging_compliance_notify_email != "" ? [{ name = "MESSAGING_COMPLIANCE_NOTIFY_EMAIL", value = var.messaging_compliance_notify_email }] : [],
+      var.messaging_mallowhq_billing_email != "" ? [{ name = "MESSAGING_MALLOWHQ_BILLING_EMAIL", value = var.messaging_mallowhq_billing_email }] : []
+    )
 
     secrets = [
       { name = "DB_PASSWORD", valueFrom = "${var.db_secret_arn}:password::" },
