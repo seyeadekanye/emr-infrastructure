@@ -225,9 +225,18 @@ resource "aws_ecs_task_definition" "api" {
       var.messaging_mallowhq_billing_email != "" ? [{ name = "MESSAGING_MALLOWHQ_BILLING_EMAIL", value = var.messaging_mallowhq_billing_email }] : []
     )
 
+    # NOTE: Every secret the application reads MUST be listed here. The
+    # multi-tenant app's bootstrap reads CONTROL_PLANE_DB_PASSWORD and
+    # DEFAULT_TENANT_DB_PASSWORD in addition to the primary DB_PASSWORD. They
+    # all source from the same db secret JSON (which has a `password` key).
+    # Historically these two were injected by the CI deploy script out of
+    # band; consolidating them here makes Terraform-rendered task defs
+    # self-sufficient and survives Block A's env-var change.
     secrets = [
       { name = "DB_PASSWORD", valueFrom = "${var.db_secret_arn}:password::" },
-      { name = "JWT_SECRET", valueFrom = "${var.jwt_secret_arn}:secret::" }
+      { name = "JWT_SECRET", valueFrom = "${var.jwt_secret_arn}:secret::" },
+      { name = "CONTROL_PLANE_DB_PASSWORD", valueFrom = "${var.db_secret_arn}:password::" },
+      { name = "DEFAULT_TENANT_DB_PASSWORD", valueFrom = "${var.db_secret_arn}:password::" }
     ]
 
     logConfiguration = {
