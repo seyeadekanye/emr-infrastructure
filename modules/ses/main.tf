@@ -45,6 +45,21 @@ resource "aws_ses_identity_notification_topic" "complaint" {
   include_original_headers = false
 }
 
+# ── HTTPS subscription delivering bounce/complaint events to the application ──
+# When set, AWS POSTs a SubscriptionConfirmation to the endpoint; emr-api's
+# MessageWebhookController.confirmSubscription handler GETs the included
+# SubscribeURL automatically. endpoint_auto_confirms tells Terraform to poll
+# AWS until the subscription state flips to "Confirmed" before the apply
+# returns — so a misconfigured backend surfaces as an apply timeout instead
+# of silently breaking later inbound events.
+resource "aws_sns_topic_subscription" "ses_webhook" {
+  count                  = var.webhook_subscription_url != "" ? 1 : 0
+  topic_arn              = aws_sns_topic.ses_notifications.arn
+  protocol               = "https"
+  endpoint               = var.webhook_subscription_url
+  endpoint_auto_confirms = true
+}
+
 # ── Route53 Records (prod only) ───────────────────────────────────────────────
 # In dev, DNS is external — use the outputs below to add records manually at
 # your registrar. Verification can take up to 72 hours.

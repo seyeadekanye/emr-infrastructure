@@ -94,3 +94,25 @@ variable "jwt_secret" {
   type      = string
   sensitive = true
 }
+
+# ── Messaging platform staff inboxes (Slice 1a — 6c) ─────────────────────────
+# Empty defaults are safe: listener code logs+skips when blank instead of
+# falling back to a stale address. Set in terraform.tfvars per env.
+
+variable "messaging_billing_notify_email" {
+  type        = string
+  default     = ""
+  description = "Billing-team inbox for ClaimDenied / PaymentReceived / AuthExpiry listener sends."
+}
+
+variable "messaging_compliance_notify_email" {
+  type        = string
+  default     = ""
+  description = "Compliance officer inbox for IncidentFiled listener sends."
+}
+
+variable "messaging_mallowhq_billing_email" {
+  type        = string
+  default     = ""
+  description = "MallowHQ ops inbox preferred over the tenant contact for Stripe PAYMENT_FAILED."
+}

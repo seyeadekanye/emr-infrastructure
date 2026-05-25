@@ -61,3 +61,20 @@ output "ses_mail_from_mx" {
 output "ses_notifications_topic_arn" {
   value = module.ses.ses_notifications_topic_arn
 }
+
+output "worker_service_name" {
+  value = module.ecs_worker.service_name
+}
+
+output "worker_task_definition_family" {
+  value = module.ecs_worker.task_definition_family
+}
+
+output "worker_log_group" {
+  value = module.ecs_worker.log_group_name
+}
+
+output "worker_ecr_repo_url" {
+  value       = module.ecr.repo_urls["emr-worker"]
+  description = "Push images with: docker push <this>:latest"
+}

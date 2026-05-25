@@ -50,7 +50,7 @@ module "secrets" {
 
 module "ecr" {
   source     = "../../modules/ecr"
-  repo_names = ["emr-api"]
+  repo_names = ["emr-api", "emr-worker"]
 }
 
 # ── RDS ───────────────────────────────────────────────────────────────────────
@@ -100,10 +100,11 @@ module "agreements" {
 # for manual addition at the registrar.
 
 module "ses" {
-  source                 = "../../modules/ses"
-  env                    = var.env
-  domain                 = var.ses_domain
-  create_route53_records = false
+  source                   = "../../modules/ses"
+  env                      = var.env
+  domain                   = var.ses_domain
+  create_route53_records   = false
+  webhook_subscription_url = "https://${var.api_domain_name}/api/v1/messaging/webhooks/ses"
 }
 
 # ── ECS ───────────────────────────────────────────────────────────────────────
@@ -129,6 +130,63 @@ module "ecs" {
   agreement_s3_bucket_arn  = module.agreements.bucket_arn
   agreement_s3_bucket_name = module.agreements.bucket_name
   kms_key_arns             = [module.secrets.kms_key_arn]
+
+  # ── Messaging platform (Slice 1a — 6c) ───────────────────────────────────
+  # Real email sends are on in dev. SMS stays off (no End User Messaging
+  # SMS provider in code yet; 10DLC paperwork not started — DESIGN.md §G).
+  messaging_email_enabled           = true
+  messaging_email_from              = "noreply@${var.ses_domain}"
+  messaging_ses_config_set          = module.ses.configuration_set_name
+  messaging_billing_notify_email    = var.messaging_billing_notify_email
+  messaging_compliance_notify_email = var.messaging_compliance_notify_email
+  messaging_mallowhq_billing_email  = var.messaging_mallowhq_billing_email
+}
+
+# ── ECS Worker (emr-worker — long-running @Scheduled jobs) ───────────────────
+# Reuses module.ecs's cluster. No load balancer. Smaller task than the API.
+# All four messaging @Scheduled kill switches default false here so the first
+# deploy verifies the JVM boots without firing every scheduled bean across
+# every tenant. Flip to true in a follow-up apply after observing a clean
+# boot. See docs/messaging/DESIGN.md §3 and the emr-worker design report.
+
+module "ecs_worker" {
+  source             = "../../modules/ecs-worker"
+  env                = var.env
+  ecr_image_url      = "${module.ecr.repo_urls["emr-worker"]}:latest"
+  cluster_id         = module.ecs.cluster_arn
+  db_secret_arn      = module.secrets.db_secret_arn
+  jwt_secret_arn     = module.secrets.jwt_secret_arn
+  private_subnet_ids = module.networking.private_subnet_ids
+  ecs_sg_id          = module.networking.ecs_sg_id
+  # Scaled to 0: the messaging @Scheduled workers (MessageOutboxWorker,
+  # AppointmentReminderWorker, TenantOnboardingSequenceWorker,
+  # AuthExpirySweepJob) were collapsed into emr-api on 2026-05-25 — see
+  # docs/messaging/CHANGELOG.md. The ECR repo, IAM roles, task def, and
+  # service stay defined so we can revive emr-worker for future genuinely-
+  # decoupled jobs (e.g. SQS consumer per DESIGN.md §D) without re-doing
+  # the bootstrap. Flip back to 1 only after deciding what runs here.
+  desired_count      = 0
+  cpu                = 512
+  memory             = 1024
+  log_retention_days = var.log_retention_days
+
+  enable_bedrock     = true
+  ses_identity_arns  = [module.ses.domain_identity_arn]
+  s3_bucket_arns     = [module.storage.bucket_arn]
+  document_s3_bucket = module.storage.bucket_name
+  kms_key_arns       = [module.secrets.kms_key_arn]
+
+  # Same messaging env block as module.ecs — worker reads identical keys.
+  messaging_email_enabled        = true
+  messaging_email_from           = "noreply@${var.ses_domain}"
+  messaging_ses_config_set       = module.ses.configuration_set_name
+  messaging_billing_notify_email = var.messaging_billing_notify_email
+
+  # First-deploy posture — all schedulers OFF until we see a clean boot.
+  messaging_outbox_enabled            = false
+  messaging_reminders_enabled         = false
+  messaging_auth_expiry_enabled       = false
+  messaging_tenant_onboarding_enabled = false
 }
 
 # ── Bastion Host (SSM Session Manager) ───────────────────────────────────────
